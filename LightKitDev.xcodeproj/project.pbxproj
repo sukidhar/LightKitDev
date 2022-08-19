@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A05B28228A01A8F00A51909 /* LKCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A05B28128A01A8F00A51909 /* LKCore.swift */; };
+		0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A05B28328A01B5500A51909 /* LKCameraCore.swift */; };
+		0AD326CD28AD666300F2031D /* LKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD326CC28AD666300F2031D /* LKError.swift */; };
 		0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */; };
 		0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE222896B18400A11DFA /* ContentView.swift */; };
 		0AFBDE252896B18500A11DFA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0AFBDE242896B18500A11DFA /* Assets.xcassets */; };
@@ -14,6 +17,7 @@
 		0AFBDE322896B18500A11DFA /* LightKitDevTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE312896B18500A11DFA /* LightKitDevTests.swift */; };
 		0AFBDE3C2896B18500A11DFA /* LightKitDevUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE3B2896B18500A11DFA /* LightKitDevUITests.swift */; };
 		0AFBDE3E2896B18500A11DFA /* LightKitDevUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE3D2896B18500A11DFA /* LightKitDevUITestsLaunchTests.swift */; };
+		0AFBDE4C2896B88F00A11DFA /* LightKitEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +38,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0A05B28128A01A8F00A51909 /* LKCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKCore.swift; sourceTree = "<group>"; };
+		0A05B28328A01B5500A51909 /* LKCameraCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKCameraCore.swift; sourceTree = "<group>"; };
+		0A7F3DC828AFB1B100CDB01F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0AD326CC28AD666300F2031D /* LKError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKError.swift; sourceTree = "<group>"; };
 		0AFBDE1D2896B18400A11DFA /* LightKitDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LightKitDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightKitDevApp.swift; sourceTree = "<group>"; };
 		0AFBDE222896B18400A11DFA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -44,6 +52,7 @@
 		0AFBDE372896B18500A11DFA /* LightKitDevUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LightKitDevUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AFBDE3B2896B18500A11DFA /* LightKitDevUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightKitDevUITests.swift; sourceTree = "<group>"; };
 		0AFBDE3D2896B18500A11DFA /* LightKitDevUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightKitDevUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightKitEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +103,8 @@
 		0AFBDE1F2896B18400A11DFA /* LightKitDev */ = {
 			isa = PBXGroup;
 			children = (
+				0A7F3DC828AFB1B100CDB01F /* Info.plist */,
+				0AFBDE4A2896B85C00A11DFA /* Sources */,
 				0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */,
 				0AFBDE222896B18400A11DFA /* ContentView.swift */,
 				0AFBDE242896B18500A11DFA /* Assets.xcassets */,
@@ -125,6 +136,17 @@
 				0AFBDE3D2896B18500A11DFA /* LightKitDevUITestsLaunchTests.swift */,
 			);
 			path = LightKitDevUITests;
+			sourceTree = "<group>";
+		};
+		0AFBDE4A2896B85C00A11DFA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */,
+				0A05B28128A01A8F00A51909 /* LKCore.swift */,
+				0A05B28328A01B5500A51909 /* LKCameraCore.swift */,
+				0AD326CC28AD666300F2031D /* LKError.swift */,
+			);
+			path = Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,7 +280,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */,
+				0AFBDE4C2896B88F00A11DFA /* LightKitEngine.swift in Sources */,
 				0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */,
+				0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */,
+				0A05B28228A01A8F00A51909 /* LKCore.swift in Sources */,
+				0AD326CD28AD666300F2031D /* LKError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,11 +446,12 @@
 				DEVELOPMENT_TEAM = 7SFL7KYWRD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LightKitDev/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -449,11 +476,12 @@
 				DEVELOPMENT_TEAM = 7SFL7KYWRD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LightKitDev/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
