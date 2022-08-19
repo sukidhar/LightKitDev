@@ -12,7 +12,7 @@ struct ContentView: View {
     var body: some View {
         if let image = LightKitEngine.instance.image {
           GeometryReader { geometry in
-            Image(image, scale: 1.0, orientation: .upMirrored, label: label)
+            Image(uiImage: image)
               .resizable()
               .scaledToFill()
               .frame(

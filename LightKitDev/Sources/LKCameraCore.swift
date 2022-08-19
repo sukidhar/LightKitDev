@@ -21,11 +21,7 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
     let device : AVCaptureDevice
     
     private var sessionQueue = DispatchQueue.init(label: "com.lightkit.sessionqueue")
-    private var cameraQueue = DispatchQueue(
-        label: "com.lightkit.videodata",
-        qos: .userInitiated,
-        attributes: [],
-        autoreleaseFrequency: .workItem)
+    private var cameraQueue = DispatchQueue(label: "com.lightkit.videodata")
     
     func run() {
         sessionQueue.async { [weak self] in
@@ -69,6 +65,7 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
         videoOutput.videoSettings =
           [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
         videoOutput.alwaysDiscardsLateVideoFrames = true
+        videoOutput.connection(with: .video)?.videoOrientation = .portrait
         guard session.canAddOutput(videoOutput) else {
             throw LKError.insufficientPermissions
         }
@@ -79,11 +76,6 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
         session.addOutput(audioOutput)
         videoOutput.setSampleBufferDelegate(self, queue: cameraQueue)
         audioOutput.setSampleBufferDelegate(self, queue: cameraQueue)
-        session.connections.forEach { connection in
-            if connection.isVideoOrientationSupported{
-                connection.videoOrientation = .portrait
-            }
-        }
         session.automaticallyConfiguresApplicationAudioSession = false
         session.commitConfiguration()
     }
@@ -91,7 +83,6 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
 
 extension LKCameraCore : AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        print("hello")
         DispatchQueue.main.async {
             if output == self.videoOutput {
                 self.currentFrame = .video(buffer: sampleBuffer)

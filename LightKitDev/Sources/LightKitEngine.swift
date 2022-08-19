@@ -13,7 +13,6 @@ import VideoToolbox
 class LightKitEngine : NSObject, ObservableObject {
     @Published private var core : (any LKCore)?
     private let context = CIContext()
-    @Published var image : CGImage?
     
     var currentCore : any LKCore  {
         get throws{
@@ -36,43 +35,22 @@ class LightKitEngine : NSObject, ObservableObject {
     
     func loadCore(with coreType: LKCoreType) throws {
         core = try coreType.getCore()
-        try currentCore.currentFrame.publisher
+        try (currentCore as! LKCameraCore).$currentFrame
             .receive(on: RunLoop.main)
             .compactMap({ frame in
-                print(frame)
             switch frame {
             case .video(buffer: let buffer):
-                guard let cgImage = CGImage.create(from: CMSampleBufferGetImageBuffer(buffer)), let ciImage = CIImage(cgImage: cgImage) else {
-                    return nil
-                }
-                return self.context.createCGImage(ciImage, from: ciImage.extent)
+                return UIImage(ciImage: CIImage(cvPixelBuffer: buffer.imageBuffer!))
             case .augmentedFrame(frame: _):
+                return nil
+            case .none:
                 return nil
             }
         })
-        .assign(to: &$image)
         try currentCore.run()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-            print((try? self.currentCore.session as? AVCaptureSession)?.isRunning)
-        })
     }
     
     func unloadCore() {
         core = nil
     }
-}
-
-extension CGImage {
-  static func create(from cvPixelBuffer: CVPixelBuffer?) -> CGImage? {
-    guard let pixelBuffer = cvPixelBuffer else {
-      return nil
-    }
-
-    var image: CGImage?
-    VTCreateCGImageFromCVPixelBuffer(
-      pixelBuffer,
-      options: nil,
-      imageOut: &image)
-    return image
-  }
 }
