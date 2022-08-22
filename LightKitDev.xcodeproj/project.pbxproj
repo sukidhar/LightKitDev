@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0A05B28228A01A8F00A51909 /* LKCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A05B28128A01A8F00A51909 /* LKCore.swift */; };
 		0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A05B28328A01B5500A51909 /* LKCameraCore.swift */; };
+		0A1A703928B3A1D600943E07 /* FrameView.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703828B3A1D600943E07 /* FrameView.metal */; };
+		0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703A28B3A7D800943E07 /* Extensions.swift */; };
 		0AD326CD28AD666300F2031D /* LKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD326CC28AD666300F2031D /* LKError.swift */; };
 		0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */; };
 		0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE222896B18400A11DFA /* ContentView.swift */; };
@@ -40,6 +42,8 @@
 /* Begin PBXFileReference section */
 		0A05B28128A01A8F00A51909 /* LKCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKCore.swift; sourceTree = "<group>"; };
 		0A05B28328A01B5500A51909 /* LKCameraCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKCameraCore.swift; sourceTree = "<group>"; };
+		0A1A703828B3A1D600943E07 /* FrameView.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = FrameView.metal; sourceTree = "<group>"; };
+		0A1A703A28B3A7D800943E07 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		0A7F3DC828AFB1B100CDB01F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0AD326CC28AD666300F2031D /* LKError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKError.swift; sourceTree = "<group>"; };
 		0AFBDE1D2896B18400A11DFA /* LightKitDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LightKitDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,6 +84,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0A1A703728B3A19100943E07 /* Metal */ = {
+			isa = PBXGroup;
+			children = (
+				0A1A703828B3A1D600943E07 /* FrameView.metal */,
+			);
+			path = Metal;
+			sourceTree = "<group>";
+		};
 		0AFBDE142896B18300A11DFA = {
 			isa = PBXGroup;
 			children = (
@@ -141,10 +153,12 @@
 		0AFBDE4A2896B85C00A11DFA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				0A1A703728B3A19100943E07 /* Metal */,
 				0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */,
 				0A05B28128A01A8F00A51909 /* LKCore.swift */,
 				0A05B28328A01B5500A51909 /* LKCameraCore.swift */,
 				0AD326CC28AD666300F2031D /* LKError.swift */,
+				0A1A703A28B3A7D800943E07 /* Extensions.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -282,7 +296,9 @@
 				0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */,
 				0AFBDE4C2896B88F00A11DFA /* LightKitEngine.swift in Sources */,
 				0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */,
+				0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */,
 				0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */,
+				0A1A703928B3A1D600943E07 /* FrameView.metal in Sources */,
 				0A05B28228A01A8F00A51909 /* LKCore.swift in Sources */,
 				0AD326CD28AD666300F2031D /* LKError.swift in Sources */,
 			);

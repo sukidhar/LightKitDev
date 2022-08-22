@@ -13,7 +13,7 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
     @Published var currentFrame: LKFrame?
     @Published var audioBuffer: CMSampleBuffer?
     
-    let position: AVCaptureDevice.Position
+    var position: AVCaptureDevice.Position
     let session: AVCaptureSession = .init()
     let videoOutput : AVCaptureVideoDataOutput = .init()
     let audioOutput : AVCaptureAudioDataOutput = .init()
@@ -21,7 +21,10 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
     let device : AVCaptureDevice
     
     private var sessionQueue = DispatchQueue.init(label: "com.lightkit.sessionqueue")
-    private var cameraQueue = DispatchQueue(label: "com.lightkit.videodata")
+    private var cameraQueue = DispatchQueue(label: "com.lightkit.videodata",
+                                            qos: .userInitiated,
+                                            attributes: [],
+                                            autoreleaseFrequency: .workItem)
     
     func run() {
         sessionQueue.async { [weak self] in
@@ -41,6 +44,7 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
             throw LKError.devicesUnavailable
         }
         self.device = captureDevice
+        self.position = captureDevice.position
         super.init()
         
         session.beginConfiguration()
@@ -93,6 +97,6 @@ extension LKCameraCore : AVCaptureVideoDataOutputSampleBufferDelegate, AVCapture
     }
     
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        print("dropped")
+        
     }
 }

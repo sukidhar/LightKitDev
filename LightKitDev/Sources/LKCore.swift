@@ -18,7 +18,7 @@ protocol LKCore {
     associatedtype LKSession : NSObject
     var currentFrame : LKFrame? { get set }
     var audioBuffer : CMSampleBuffer? { get set }
-    var position : AVCaptureDevice.Position { get }
+    var position : AVCaptureDevice.Position { get set }
     var session : LKSession { get }
     
     func run()
