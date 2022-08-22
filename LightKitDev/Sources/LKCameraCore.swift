@@ -43,6 +43,7 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
         guard let captureDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: position).devices.first else {
             throw LKError.devicesUnavailable
         }
+        captureDevice.set(frameRate: 60)
         self.device = captureDevice
         self.position = captureDevice.position
         super.init()

@@ -12,7 +12,8 @@ struct ContentView: View {
     @StateObject var viewModel = ViewModel()
     private let label = Text("Video feed")
     var body: some View {
-        CameraView().edgesIgnoringSafeArea(.all)
+        CameraView()
+            .aspectRatio( .init(width: 1080, height: 1920) ,contentMode: .fit)
     }
     
     class ViewModel : ObservableObject {

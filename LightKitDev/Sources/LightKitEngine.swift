@@ -55,6 +55,7 @@ class LightKitEngine : NSObject, ObservableObject {
         metalView.framebufferOnly = false
         metalView.colorPixelFormat = .bgra8Unorm
         metalView.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
+        metalView.preferredFramesPerSecond = 60
         _commandQueue = metalDevice?.makeCommandQueue()
         super.init()
         do {
@@ -256,10 +257,10 @@ extension LightKitEngine{
                     -1.0, 1.0,
                     -1.0, -1.0
                 ],textureData:  [
-                    1, 0,
-                    1, 1,
                     0, 0,
-                    0, 1
+                    1, 0,
+                    0, 1,
+                    1, 1,
                 ],vertexIndexData: [
                     0, 1, 2,
                     1, 2, 3
@@ -271,10 +272,10 @@ extension LightKitEngine{
                     -1.0, 1.0,
                     -1.0, -1.0
                 ], textureData:  [
-                    1, 1,
-                    1, 0,
                     0, 1,
-                    0, 0
+                    1, 1,
+                    0, 0,
+                    1, 0,
                 ], vertexIndexData: [
                     0, 1, 2,
                     1, 2, 3
