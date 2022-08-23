@@ -22,7 +22,10 @@ class LightKitEngine : NSObject, ObservableObject {
         }
     }
     
-    @Published public private(set) var cameraTexture : MTLTexture?
+    @Published public private(set) var currentBuffer : CMSampleBuffer?
+    private var currentBufferSink : AnyCancellable?
+    @Published public private(set) var originalTexture : MTLTexture?
+    @Published public private(set) var processedTexture : MTLTexture?
     @Published var image: CGImage?
     private let context = CIContext()
     
@@ -63,7 +66,7 @@ class LightKitEngine : NSObject, ObservableObject {
         } catch {
             print(error)
         }
-        
+        render()
     }
     
     func loadCore(with coreType: LKCoreType) throws {
@@ -71,19 +74,32 @@ class LightKitEngine : NSObject, ObservableObject {
         loadViewProcessor()
         try (currentCore as! LKCameraCore).$currentFrame
             .receive(on: RunLoop.main)
-            .compactMap({ [unowned self] frame in
+            .compactMap({ frame in
                 switch frame {
                 case .video(buffer: let buffer):
-                    renderPixelBuffer(sampleBuffer: buffer)
-                    return nil
+                    return buffer
                 case .augmentedFrame(frame: _):
                     return nil
                 case .none:
                     return nil
                 }
             })
-            .assign(to: &$image)
+            .assign(to: &$currentBuffer)
         try currentCore.run()
+    }
+    
+    func render(){
+        $currentBuffer
+            .receive(on: RunLoop.main)
+            .compactMap({ [unowned self] buffer in
+                if let buffer = buffer{
+                    guard let cvbuffer = CMSampleBufferGetImageBuffer(buffer) else { return nil }
+                    return makeTexture(imageBuffer: cvbuffer)
+                }
+                return nil
+            })
+            .assign(to: &$originalTexture)
+            
     }
     
     private func loadViewProcessor(){
@@ -110,12 +126,16 @@ class LightKitEngine : NSObject, ObservableObject {
         _ = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         guard let cvbuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         guard let sourceTexture = makeTexture(imageBuffer: cvbuffer) else { return }
-        cameraTexture = makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height)
+        originalTexture = sourceTexture
+        processedTexture = makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height)
         autoreleasepool { [unowned self] in
             if let drawable = metalView.currentDrawable{
                 do {
                     let commandBuffer = try commandQueue.makeCommandBuffer()
                     try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: sourceTexture)
+                    commandBuffer?.addCompletedHandler({ [unowned self] _ in
+                        processedTexture = drawable.texture
+                    })
                     commandBuffer?.present(drawable)
                     commandBuffer?.commit()
                     commandBuffer?.waitUntilCompleted()
@@ -198,8 +218,6 @@ extension LightKitEngine{
             else {
                 throw LKError.failedToIntialiseViewProcessor
             }
-            
-            
             
             let fragmentFunction = library.makeFunction(name: "graphics_fragment")
             let vertexFunction = library.makeFunction(name: "graphics_vertex")
