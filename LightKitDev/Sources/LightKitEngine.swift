@@ -12,7 +12,11 @@ import VideoToolbox
 import MetalKit
 
 class LightKitEngine : NSObject, ObservableObject {
+    
+    /// The core that is set currently for the engine to receive input
     private var core : (any LKCore)?
+    
+    /// Retrieves the instance of LKCore that is being used for the engine at the time of calling.
     var currentCore : any LKCore  {
         get throws{
             if let core = core{
@@ -21,7 +25,11 @@ class LightKitEngine : NSObject, ObservableObject {
             throw LKError.coreUnavailable
         }
     }
+    /// The sink that fetches the current core frames
+    private var coreSink : AnyCancellable?
     
+    
+    /// The current buffer received from the core. This publisher will not receieve any value if the core is not LKCameraCore
     @Published public private(set) var currentBuffer : CMSampleBuffer?
     private var currentBufferSink : AnyCancellable?
     
@@ -58,7 +66,6 @@ class LightKitEngine : NSObject, ObservableObject {
     static let instance = LightKitEngine()
     
     override private init() {
-        
         metalView = .init(frame: .zero, device: metalDevice)
         metalView.backgroundColor = .clear
         metalView.framebufferOnly = false
@@ -87,9 +94,10 @@ class LightKitEngine : NSObject, ObservableObject {
     }
     
     func loadCore(with coreType: LKCoreType) throws {
+        unloadCore()
         core = try coreType.getCore()
         loadViewProcessor()
-        try (currentCore as! LKCameraCore).$currentFrame
+        coreSink = try (currentCore as! LKCameraCore).$currentFrame
             .receive(on: RunLoop.main)
             .compactMap({ frame in
                 switch frame {
@@ -101,8 +109,23 @@ class LightKitEngine : NSObject, ObservableObject {
                     return nil
                 }
             })
-            .assign(to: &$currentBuffer)
+            .sink(receiveValue: { [weak self] buffer in
+                self?.currentBuffer = buffer
+            })
         try currentCore.run()
+    }
+    
+    func toggleCore() throws{
+        switch try currentCore.position {
+        case .unspecified:
+            print("")
+        case .back:
+            try loadCore(with: .camera(position: .front))
+        case .front:
+            try loadCore(with: .camera(position: .back))
+        @unknown default:
+            print("")
+        }
     }
     
     func render(){
@@ -119,8 +142,8 @@ class LightKitEngine : NSObject, ObservableObject {
         
         orginalTextureSink = $originalTexture
             .receive(on: RunLoop.main)
-            .sink { texture in
-                self.renderPixelBuffer()
+            .sink { [unowned self] texture in
+                commitToProcessor()
             }
             
     }
@@ -142,10 +165,11 @@ class LightKitEngine : NSObject, ObservableObject {
     }
     
     func unloadCore() {
+        try? currentCore.stop()
         core = nil
     }
     
-    func renderPixelBuffer(){
+    func commitToProcessor(){
         guard let sourceTexture = originalTexture?.texture else { return }
         processedTexture = .init(texture: makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height), timestamp: originalTexture?.timestamp)
         autoreleasepool { [unowned self] in

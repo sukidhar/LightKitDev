@@ -13,7 +13,9 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
     @Published var currentFrame: LKFrame?
     @Published var audioBuffer: CMSampleBuffer?
     
-    var position: AVCaptureDevice.Position
+    var position: AVCaptureDevice.Position {
+        device.position
+    }
     let session: AVCaptureSession = .init()
     let videoOutput : AVCaptureVideoDataOutput = .init()
     let audioOutput : AVCaptureAudioDataOutput = .init()
@@ -39,13 +41,11 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
     }
     
     init(position: AVCaptureDevice.Position = .unspecified) throws {
-        self.position = position
         guard let captureDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: position).devices.first else {
             throw LKError.devicesUnavailable
         }
         captureDevice.set(frameRate: 60)
         self.device = captureDevice
-        self.position = captureDevice.position
         super.init()
         
         session.beginConfiguration()

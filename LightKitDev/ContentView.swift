@@ -14,6 +14,9 @@ struct ContentView: View {
     var body: some View {
         CameraView()
             .aspectRatio( .init(width: 1080, height: 1920) ,contentMode: .fit)
+            .onTapGesture {
+                try? LightKitEngine.instance.toggleCore()
+            }
 //        GeometryReader { geometry in
 //            Image(uiImage: viewModel.image ?? UIImage())
 //            .resizable()
