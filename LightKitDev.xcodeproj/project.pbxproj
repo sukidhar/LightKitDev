@@ -12,6 +12,7 @@
 		0A1A703928B3A1D600943E07 /* FrameView.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703828B3A1D600943E07 /* FrameView.metal */; };
 		0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703A28B3A7D800943E07 /* Extensions.swift */; };
 		0A1A703D28B3ED2A00943E07 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703C28B3ED2A00943E07 /* Filter.swift */; };
+		0A5DE2D928C62E9E001E449B /* EdgeDetector.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */; };
 		0AD326CD28AD666300F2031D /* LKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD326CC28AD666300F2031D /* LKError.swift */; };
 		0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */; };
 		0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE222896B18400A11DFA /* ContentView.swift */; };
@@ -46,6 +47,7 @@
 		0A1A703828B3A1D600943E07 /* FrameView.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = FrameView.metal; sourceTree = "<group>"; };
 		0A1A703A28B3A7D800943E07 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		0A1A703C28B3ED2A00943E07 /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
+		0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = EdgeDetector.metal; sourceTree = "<group>"; };
 		0A7F3DC828AFB1B100CDB01F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0AD326CC28AD666300F2031D /* LKError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKError.swift; sourceTree = "<group>"; };
 		0AFBDE1D2896B18400A11DFA /* LightKitDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LightKitDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				0A1A703828B3A1D600943E07 /* FrameView.metal */,
+				0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */,
 			);
 			path = Metal;
 			sourceTree = "<group>";
@@ -298,6 +301,7 @@
 			files = (
 				0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */,
 				0AFBDE4C2896B88F00A11DFA /* LightKitEngine.swift in Sources */,
+				0A5DE2D928C62E9E001E449B /* EdgeDetector.metal in Sources */,
 				0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */,
 				0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */,
 				0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */,

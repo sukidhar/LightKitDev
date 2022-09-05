@@ -28,16 +28,28 @@ class LightKitEngine : NSObject, ObservableObject {
     /// The sink that fetches the current core frames
     private var coreSink : AnyCancellable?
     
+    public var filter : Filter? = nil{
+        didSet{
+            guard let filter = filter,let library = metalDevice?.makeDefaultLibrary(), let function = library.makeFunction(name: filter.metalFunction) else {
+                computePipelineState = nil
+                return
+            }
+            computePipelineState =  try? metalDevice?.makeComputePipelineState(function: function)
+        }
+    }
+    
+    private var computePipelineState : MTLComputePipelineState?
     
     /// The current buffer received from the core. This publisher will not receieve any value if the core is not LKCameraCore
     @Published public private(set) var currentBuffer : CMSampleBuffer?
     private var currentBufferSink : AnyCancellable?
     
-    @Published public private(set) var originalTexture : LKTexture?
+    /// Unprocessed Metal Texture generated, i.e camera output or ARFrame output as is published.
+    @Published public private(set) var originalTexture : LKTextureNode?
     private var orginalTextureSink : AnyCancellable?
     
-    @Published public private(set) var processedTexture : LKTexture?
-
+    @Published public private(set) var processedTexture : LKTextureNode?
+    
     private let context = CIContext()
     
     let metalDevice = MTLCreateSystemDefaultDevice()
@@ -81,16 +93,6 @@ class LightKitEngine : NSObject, ObservableObject {
             print(error)
         }
         render()
-    }
-    
-    func setUpMetalView(_ view : MTKView) {
-        view.device = metalDevice
-        view.backgroundColor = .clear
-        view.framebufferOnly = false
-        view.colorPixelFormat = .bgra8Unorm
-        view.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
-        view.preferredFramesPerSecond = 60
-        _commandQueue = metalDevice?.makeCommandQueue()
     }
     
     func loadCore(with coreType: LKCoreType) throws {
@@ -145,7 +147,24 @@ class LightKitEngine : NSObject, ObservableObject {
             .sink { [unowned self] texture in
                 commitToProcessor()
             }
-            
+    }
+    
+    private func makeThreadgroupsConfig(
+        textureWidth: Int,
+        textureHeight: Int,
+        threadExecutionWidth: Int,
+        maxTotalThreadsPerThreadgroup: Int
+        ) -> (threadgroupsPerGrid: MTLSize, threadsPerThreadgroup: MTLSize) {
+        
+        let w = threadExecutionWidth
+        let h = maxTotalThreadsPerThreadgroup / w
+        
+        let threadsPerThreadgroup = MTLSizeMake(w, h, 1)
+        let horizontalThreadgroupCount = (textureWidth + w - 1) / w
+        let verticalThreadgroupCount = (textureHeight + h - 1) / h
+        let threadgroupsPerGrid = MTLSizeMake(horizontalThreadgroupCount, verticalThreadgroupCount, 1)
+        
+        return (threadgroupsPerGrid: threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
     }
     
     private func loadViewProcessor(){
@@ -176,7 +195,23 @@ class LightKitEngine : NSObject, ObservableObject {
             if let drawable = metalView.currentDrawable{
                 do {
                     let commandBuffer = try commandQueue.makeCommandBuffer()
-                    try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: sourceTexture)
+                    if let computePipelineState = computePipelineState, let texture = processedTexture?.texture{
+                        let encoder = commandBuffer?.makeComputeCommandEncoder()
+                        encoder?.setComputePipelineState(computePipelineState)
+                        encoder?.setTexture(texture, index: 0)
+                        encoder?.setTexture(originalTexture?.texture, index: 1)
+                        let config = makeThreadgroupsConfig(
+                            textureWidth: texture.width,
+                            textureHeight: texture.height,
+                            threadExecutionWidth: computePipelineState.threadExecutionWidth,
+                            maxTotalThreadsPerThreadgroup: computePipelineState.maxTotalThreadsPerThreadgroup
+                        )
+                        encoder?.dispatchThreadgroups(config.threadgroupsPerGrid, threadsPerThreadgroup: config.threadsPerThreadgroup)
+                        encoder?.endEncoding()
+                        try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: processedTexture!.texture!)
+                    }else{
+                        try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: sourceTexture)
+                    }
                     commandBuffer?.addCompletedHandler({ [unowned self] _ in
                         processedTexture = .init(texture: drawable.texture, timestamp: originalTexture?.timestamp)
                     })
@@ -349,7 +384,7 @@ extension LightKitEngine{
     }
 }
 
-struct LKTexture {
+struct LKTextureNode {
     let texture: MTLTexture?
     let timestamp : CMTime?
 }
