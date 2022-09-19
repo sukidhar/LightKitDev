@@ -44,10 +44,8 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
         guard let captureDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: position).devices.first else {
             throw LKError.devicesUnavailable
         }
-        captureDevice.set(frameRate: 60)
-        self.device = captureDevice
+        device = captureDevice
         super.init()
-        
         session.beginConfiguration()
         guard let videoInput = try? AVCaptureDeviceInput(device: device) else {
             throw LKError.insufficientPermissions
@@ -82,14 +80,16 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
         videoOutput.setSampleBufferDelegate(self, queue: cameraQueue)
         audioOutput.setSampleBufferDelegate(self, queue: cameraQueue)
         session.automaticallyConfiguresApplicationAudioSession = false
+        device.set(frameRate: 60)
         session.commitConfiguration()
     }
 }
 
-extension LKCameraCore : AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
+extension LKCameraCore : AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         DispatchQueue.main.async {
             if output == self.videoOutput {
+//                print(CVPixelBufferGetWidth(sampleBuffer.imageBuffer!), CVPixelBufferGetHeight(sampleBuffer.imageBuffer!))
                 self.currentFrame = .video(buffer: sampleBuffer)
             }else{
                 self.audioBuffer = sampleBuffer

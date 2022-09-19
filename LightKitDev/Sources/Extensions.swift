@@ -19,7 +19,10 @@ extension UIWindowScene{
 extension AVCaptureDevice {
     func set(frameRate: Double) {
         do { try lockForConfiguration()
-            activeFormat = formats.first(where: { format in
+            activeFormat = formats.sorted(by: { f1, f2 in
+                f1.formatDescription.dimensions.height > f2.formatDescription.dimensions.height && f1.formatDescription.dimensions.width > f2.formatDescription.dimensions.width
+            })
+            .first(where: { format in
                 format.videoSupportedFrameRateRanges.contains { range in
                     range.maxFrameRate == frameRate
                 }
@@ -30,8 +33,6 @@ extension AVCaptureDevice {
                 print("Requested FPS is not supported by the device's activeFormat !")
                 return
             }
-            
-            
             activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRate))
             activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRate))
             unlockForConfiguration()

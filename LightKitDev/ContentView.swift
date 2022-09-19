@@ -10,14 +10,25 @@ import MetalKit
 
 struct ContentView: View {
     private let label = Text("Video feed")
+//    @StateObject var viewModel = ViewModel()
     var body: some View {
         CameraView()
             .aspectRatio( .init(width: 1080, height: 1920) ,contentMode: .fit)
             .onTapGesture {
-                if LightKitEngine.instance.filter == nil{
-                    LightKitEngine.instance.filter = .edgeDetectionFilter
-                }else{
-                    LightKitEngine.instance.filter = nil
+                do {
+                    switch try LightKitEngine.instance.currentCore.position {
+                        
+                    case .unspecified:
+                        try LightKitEngine.instance.loadCore(with: .camera(position: .back))
+                    case .back:
+                        try LightKitEngine.instance.loadCore(with: .camera(position: .front))
+                    case .front:
+                        try LightKitEngine.instance.loadCore(with: .camera(position: .back))
+                    @unknown default:
+                        try LightKitEngine.instance.loadCore(with: .camera(position: .front))
+                    }
+                }catch {
+                    print(error)
                 }
             }
         //        FrameView()

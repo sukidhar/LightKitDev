@@ -10,6 +10,7 @@ import ARKit
 import Combine
 import VideoToolbox
 import MetalKit
+import MetalPerformanceShaders
 
 class LightKitEngine : NSObject, ObservableObject {
     
@@ -36,6 +37,18 @@ class LightKitEngine : NSObject, ObservableObject {
             }
             computePipelineState =  try? metalDevice?.makeComputePipelineState(function: function)
         }
+    }
+    
+    let fallBackMTAllocator : MPSCopyAllocator =
+    {
+        (kernel: MPSKernel, buffer: MTLCommandBuffer, texture: MTLTexture) -> MTLTexture in
+        
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: texture.pixelFormat,
+                                                                  width: texture.width,
+                                                                  height: texture.height,
+                                                                  mipmapped: false)
+        descriptor.usage = [.shaderWrite, .shaderRead]
+        return buffer.device.makeTexture(descriptor: descriptor)!
     }
     
     private var computePipelineState : MTLComputePipelineState?
@@ -189,35 +202,27 @@ class LightKitEngine : NSObject, ObservableObject {
     }
     
     func commitToProcessor(){
-        guard let sourceTexture = originalTexture?.texture else { return }
+        guard var sourceTexture = originalTexture?.texture else { return }
         processedTexture = .init(texture: makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height), timestamp: originalTexture?.timestamp)
         autoreleasepool { [unowned self] in
-            if let drawable = metalView.currentDrawable{
+            if let drawable = metalView.currentDrawable, let commandBuffer = try? commandQueue.makeCommandBuffer(){
                 do {
-                    let commandBuffer = try commandQueue.makeCommandBuffer()
-                    if let computePipelineState = computePipelineState, let texture = processedTexture?.texture{
-                        let encoder = commandBuffer?.makeComputeCommandEncoder()
-                        encoder?.setComputePipelineState(computePipelineState)
-                        encoder?.setTexture(texture, index: 0)
-                        encoder?.setTexture(originalTexture?.texture, index: 1)
-                        let config = makeThreadgroupsConfig(
-                            textureWidth: texture.width,
-                            textureHeight: texture.height,
-                            threadExecutionWidth: computePipelineState.threadExecutionWidth,
-                            maxTotalThreadsPerThreadgroup: computePipelineState.maxTotalThreadsPerThreadgroup
-                        )
-                        encoder?.dispatchThreadgroups(config.threadgroupsPerGrid, threadsPerThreadgroup: config.threadsPerThreadgroup)
-                        encoder?.endEncoding()
-                        try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: processedTexture!.texture!)
-                    }else{
-                        try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: sourceTexture)
-                    }
-                    commandBuffer?.addCompletedHandler({ [unowned self] _ in
+                    let sobel = MPSImageSobel(device: metalDevice!)
+                    sobel.encode(commandBuffer: commandBuffer,
+                                    inPlaceTexture: &sourceTexture,
+                                    fallbackCopyAllocator: fallBackMTAllocator)
+//                    let filter = MPSImageGaussianBlur(device: metalDevice!, sigma: 3)
+//                    filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &sourceTexture, fallbackCopyAllocator: fallBackMTAllocator)
+//                    sobel.encode(commandBuffer: commandBuffer,
+//                                    inPlaceTexture: &sourceTexture,
+//                                    fallbackCopyAllocator: fallBackMTAllocator)
+                    try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: sourceTexture)
+                    commandBuffer.addCompletedHandler({ [unowned self] _ in
                         processedTexture = .init(texture: drawable.texture, timestamp: originalTexture?.timestamp)
                     })
-                    commandBuffer?.present(drawable)
-                    commandBuffer?.commit()
-                    commandBuffer?.waitUntilCompleted()
+                    commandBuffer.present(drawable)
+                    commandBuffer.commit()
+                    commandBuffer.waitUntilCompleted()
                 } catch {
                     print(error)
                 }
@@ -237,27 +242,15 @@ class LightKitEngine : NSObject, ObservableObject {
     }
     
     func makeTexture(imageBuffer : CVPixelBuffer) -> MTLTexture?{
-        if textureCache == nil {
-            makeTextureCache()
-        }
-        if let textureCache = textureCache{
-            let width = CVPixelBufferGetWidth(imageBuffer)
-            let height = CVPixelBufferGetHeight(imageBuffer)
-            var imageTexture: CVMetalTexture?
-            let result =  CVMetalTextureCacheCreateTextureFromImage(
-                kCFAllocatorDefault,
-                textureCache,
-                imageBuffer,
-                nil,
-                try! currentProcessor.pixelFormat,
-                width,
-                height,
-                0,
-                &imageTexture
-            )
-            if result == kCVReturnSuccess, let _imageTexture = imageTexture {
-                return CVMetalTextureGetTexture(_imageTexture)
-            }
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: viewProcessor?.pixelFormat ?? .bgra8Unorm,
+            width: CVPixelBufferGetWidth(imageBuffer),
+            height: CVPixelBufferGetHeight(imageBuffer),
+            mipmapped: false
+        )
+        textureDescriptor.usage = [MTLTextureUsage.shaderWrite, .shaderRead]
+        if let ioSurface = CVPixelBufferGetIOSurface(imageBuffer){
+            return metalDevice?.makeTexture(descriptor: textureDescriptor, iosurface: ioSurface.takeUnretainedValue(), plane: 0)
         }
         return nil
     }
