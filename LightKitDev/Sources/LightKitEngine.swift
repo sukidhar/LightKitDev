@@ -127,6 +127,7 @@ class LightKitEngine : NSObject, ObservableObject {
             .sink(receiveValue: { [weak self] buffer in
                 self?.currentBuffer = buffer
             })
+            
         try currentCore.run()
     }
     
