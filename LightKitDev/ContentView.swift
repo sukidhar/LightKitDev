@@ -66,7 +66,7 @@ struct ContentView: View {
         }
         
         func makeUIView(context: Context) -> MTKView {
-            return LightKitEngine.instance.metalView
+            return .init()
         }
     }
 }

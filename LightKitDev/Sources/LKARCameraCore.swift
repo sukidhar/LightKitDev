@@ -5,36 +5,35 @@
 //  Created by sukidhar on 20/09/22.
 //
 
+
+
 import ARKit
+import RealityKit
 import SceneKit
 
-class LKARCameraCore : NSObject, LKCore{
-    var currentFrame: LKFrame?
-    
-    var audioBuffer: CMSampleBuffer?
-    
-    var position: AVCaptureDevice.Position
+
+@available(iOS 15, *)
+class LKARCameraCore : LKCore{
+    var position: Position
     
     var session: ARSession
     
+    var view: ARView = .init(frame: .zero)
+    
     private var configuration : ARConfiguration
     
-    func run() {
+    override func run() {
         session.run(configuration, options: .resetTracking)
     }
     
-    func stop() {
+    override func stop() {
         session.pause()
     }
     
-    init(currentFrame: LKFrame? = nil, audioBuffer: CMSampleBuffer? = nil, position: AVCaptureDevice.Position, session: ARSession) {
-        self.currentFrame = currentFrame
-        self.audioBuffer = audioBuffer
+    init(position: Position = .back) {
         self.position = position
-        self.session = session
+        self.session = .init()
         switch position{
-        case .unspecified:
-            configuration = ARWorldTrackingConfiguration()
         case .back:
             configuration = ARWorldTrackingConfiguration()
             if ARWorldTrackingConfiguration.supportsUserFaceTracking{
@@ -45,14 +44,13 @@ class LKARCameraCore : NSObject, LKCore{
             if ARFaceTrackingConfiguration.supportsWorldTracking{
                 (configuration as? ARFaceTrackingConfiguration)?.isWorldTrackingEnabled = true
             }
-        @unknown default:
-            fatalError("Unkown configuration required, please create a custom core by extending LKCore")
         }
         super.init()
         session.delegate = self
     }
 }
 
+@available(iOS 15, *)
 extension LKARCameraCore : ARSessionDelegate {
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         

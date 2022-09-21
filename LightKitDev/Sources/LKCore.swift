@@ -8,37 +8,48 @@
 import Foundation
 import AVFoundation
 import ARKit
+import MetalKit
+import RealityKit
 
 enum LKFrame{
     case video(buffer: CMSampleBuffer)
     case augmentedFrame(frame: ARFrame)
 }
 
-protocol LKCore {
-    associatedtype LKSession : NSObject
-    var currentFrame : LKFrame? { get set }
-    var audioBuffer : CMSampleBuffer? { get set }
-    var position : AVCaptureDevice.Position { get }
-    var session : LKSession { get }
-    
-    func run()
-    func stop()
-}
-
-
 enum LKCoreType{
     case camera(position: AVCaptureDevice.Position)
-    case arCamera(position: AVCaptureDevice.Position)
-    case customCore(core: any LKCore)
+    case arCamera(position: LKCore.Position)
     
-    func getCore() throws -> any LKCore {
+    func getCore() throws -> LKCore {
         switch self {
         case .camera(position: let position):
             return try LKCameraCore(position: position)
-        case .arCamera(position: _):
-            throw LKError.coreUnavailable
-        case .customCore(core: let core):
-            return core
+        case .arCamera(position: let position):
+            if #available(iOS 15, *) {
+                return LKARCameraCore(position: position)
+            } else {
+                throw LKError.coreUnavailable
+            }
         }
+    }
+}
+
+class LKCore : NSObject, ObservableObject{
+    typealias LKSession = NSObject
+    
+    @Published var currentFrame: LKFrame?
+    @Published var audioBuffer: CMSampleBuffer?
+        
+    func run(){
+        fatalError("Can't call this method on super class. Need to implement this method in subclass")
+    }
+    
+    func stop(){
+        fatalError("Can't call this method on super class. Need to implement this method in subclass")
+    }
+    
+    enum Position {
+        case front
+        case back
     }
 }

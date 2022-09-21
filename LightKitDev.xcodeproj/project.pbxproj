@@ -15,6 +15,8 @@
 		0A5DE2D928C62E9E001E449B /* EdgeDetector.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */; };
 		0A5DE2DB28D983E6001E449B /* LKARCameraCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */; };
 		0AD326CD28AD666300F2031D /* LKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD326CC28AD666300F2031D /* LKError.swift */; };
+		0AE7D3B528DB3B7500AAEF1A /* LKTextureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */; };
+		0AE7D3B728DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE7D3B628DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift */; };
 		0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */; };
 		0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFBDE222896B18400A11DFA /* ContentView.swift */; };
 		0AFBDE252896B18500A11DFA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0AFBDE242896B18500A11DFA /* Assets.xcassets */; };
@@ -52,6 +54,8 @@
 		0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKARCameraCore.swift; sourceTree = "<group>"; };
 		0A7F3DC828AFB1B100CDB01F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0AD326CC28AD666300F2031D /* LKError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKError.swift; sourceTree = "<group>"; };
+		0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKTextureNode.swift; sourceTree = "<group>"; };
+		0AE7D3B628DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LightKitEngine+ViewProcessor.swift"; sourceTree = "<group>"; };
 		0AFBDE1D2896B18400A11DFA /* LightKitDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LightKitDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AFBDE202896B18400A11DFA /* LightKitDevApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightKitDevApp.swift; sourceTree = "<group>"; };
 		0AFBDE222896B18400A11DFA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -162,6 +166,8 @@
 			children = (
 				0A1A703728B3A19100943E07 /* Metal */,
 				0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */,
+				0AE7D3B628DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift */,
+				0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */,
 				0A05B28128A01A8F00A51909 /* LKCore.swift */,
 				0A05B28328A01B5500A51909 /* LKCameraCore.swift */,
 				0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */,
@@ -306,9 +312,11 @@
 				0AFBDE232896B18400A11DFA /* ContentView.swift in Sources */,
 				0AFBDE4C2896B88F00A11DFA /* LightKitEngine.swift in Sources */,
 				0A5DE2D928C62E9E001E449B /* EdgeDetector.metal in Sources */,
+				0AE7D3B528DB3B7500AAEF1A /* LKTextureNode.swift in Sources */,
 				0AFBDE212896B18400A11DFA /* LightKitDevApp.swift in Sources */,
 				0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */,
 				0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */,
+				0AE7D3B728DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift in Sources */,
 				0A1A703928B3A1D600943E07 /* FrameView.metal in Sources */,
 				0A05B28228A01A8F00A51909 /* LKCore.swift in Sources */,
 				0A1A703D28B3ED2A00943E07 /* Filter.swift in Sources */,

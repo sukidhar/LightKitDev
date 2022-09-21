@@ -8,11 +8,7 @@
 import Foundation
 import AVFoundation
 
-class LKCameraCore : NSObject, LKCore, ObservableObject {
-    
-    @Published var currentFrame: LKFrame?
-    @Published var audioBuffer: CMSampleBuffer?
-    
+class LKCameraCore : LKCore {
     var position: AVCaptureDevice.Position {
         device.position
     }
@@ -28,19 +24,19 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
                                             attributes: [],
                                             autoreleaseFrequency: .workItem)
     
-    func run() {
+    override func run() {
         sessionQueue.async { [weak self] in
             self?.session.startRunning()
         }
     }
     
-    func stop() {
+    override func stop() {
         sessionQueue.async { [weak self] in
             self?.session.stopRunning()
         }
     }
     
-    init(position: AVCaptureDevice.Position = .unspecified) throws {
+    init(position: AVCaptureDevice.Position = .unspecified, fps: Double = 60) throws {
         guard let captureDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: position).devices.first else {
             throw LKError.devicesUnavailable
         }
@@ -80,7 +76,7 @@ class LKCameraCore : NSObject, LKCore, ObservableObject {
         videoOutput.setSampleBufferDelegate(self, queue: cameraQueue)
         audioOutput.setSampleBufferDelegate(self, queue: cameraQueue)
         session.automaticallyConfiguresApplicationAudioSession = false
-        device.set(frameRate: 60)
+        device.set(frameRate: fps)
         session.commitConfiguration()
     }
 }
@@ -89,7 +85,6 @@ extension LKCameraCore : AVCaptureVideoDataOutputSampleBufferDelegate, AVCapture
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         DispatchQueue.main.async {
             if output == self.videoOutput {
-//                print(CVPixelBufferGetWidth(sampleBuffer.imageBuffer!), CVPixelBufferGetHeight(sampleBuffer.imageBuffer!))
                 self.currentFrame = .video(buffer: sampleBuffer)
             }else{
                 self.audioBuffer = sampleBuffer
