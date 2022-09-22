@@ -16,23 +16,24 @@ import SceneKit
 class LKARCameraCore : LKCore{
     var position: Position
     
-    var session: ARSession
+    let _session : ARSession
     
-    var view: ARView = .init(frame: .zero)
-    
+    override var session: LKCore.LKSession{
+        return _session
+    }
+            
     private var configuration : ARConfiguration
     
     override func run() {
-        session.run(configuration, options: .resetTracking)
+        _session.run(configuration, options: .resetTracking)
     }
     
     override func stop() {
-        session.pause()
+        _session.pause()
     }
     
-    init(position: Position = .back) {
+    init(position: Position = .back, session : ARSession = .init()) {
         self.position = position
-        self.session = .init()
         switch position{
         case .back:
             configuration = ARWorldTrackingConfiguration()
@@ -45,8 +46,9 @@ class LKARCameraCore : LKCore{
                 (configuration as? ARFaceTrackingConfiguration)?.isWorldTrackingEnabled = true
             }
         }
+        _session = session
         super.init()
-        session.delegate = self
+        _session.delegate = self
     }
 }
 

@@ -16,30 +16,16 @@ enum LKFrame{
     case augmentedFrame(frame: ARFrame)
 }
 
-enum LKCoreType{
-    case camera(position: AVCaptureDevice.Position)
-    case arCamera(position: LKCore.Position)
-    
-    func getCore() throws -> LKCore {
-        switch self {
-        case .camera(position: let position):
-            return try LKCameraCore(position: position)
-        case .arCamera(position: let position):
-            if #available(iOS 15, *) {
-                return LKARCameraCore(position: position)
-            } else {
-                throw LKError.coreUnavailable
-            }
-        }
-    }
-}
-
 class LKCore : NSObject, ObservableObject{
     typealias LKSession = NSObject
     
     @Published var currentFrame: LKFrame?
     @Published var audioBuffer: CMSampleBuffer?
-        
+    
+    var session : LKSession{
+        fatalError("can't get the stored varibale from an abstract class")
+    }
+    
     func run(){
         fatalError("Can't call this method on super class. Need to implement this method in subclass")
     }
@@ -51,5 +37,10 @@ class LKCore : NSObject, ObservableObject{
     enum Position {
         case front
         case back
+    }
+    
+    enum Mode{
+        case ar
+        case nonAR
     }
 }

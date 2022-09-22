@@ -12,7 +12,12 @@ class LKCameraCore : LKCore {
     var position: AVCaptureDevice.Position {
         device.position
     }
-    let session: AVCaptureSession = .init()
+    private let _session: AVCaptureSession = .init()
+    
+    override var session: LKCore.LKSession {
+        return _session
+    }
+    
     let videoOutput : AVCaptureVideoDataOutput = .init()
     let audioOutput : AVCaptureAudioDataOutput = .init()
     
@@ -26,15 +31,17 @@ class LKCameraCore : LKCore {
     
     override func run() {
         sessionQueue.async { [weak self] in
-            self?.session.startRunning()
+            self?._session.startRunning()
         }
     }
     
     override func stop() {
         sessionQueue.async { [weak self] in
-            self?.session.stopRunning()
+            self?._session.stopRunning()
         }
     }
+    
+
     
     init(position: AVCaptureDevice.Position = .unspecified, fps: Double = 60) throws {
         guard let captureDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: position).devices.first else {
@@ -42,14 +49,14 @@ class LKCameraCore : LKCore {
         }
         device = captureDevice
         super.init()
-        session.beginConfiguration()
+        _session.beginConfiguration()
         guard let videoInput = try? AVCaptureDeviceInput(device: device) else {
             throw LKError.insufficientPermissions
         }
-        guard session.canAddInput(videoInput) else {
+        guard _session.canAddInput(videoInput) else {
             throw LKError.insufficientPermissions
         }
-        session.addInput(videoInput)
+        _session.addInput(videoInput)
         guard let audioDevice = AVCaptureDevice.default(for: .audio) else
         {
             throw LKError.devicesUnavailable
@@ -57,27 +64,27 @@ class LKCameraCore : LKCore {
         guard let audioInput = try? AVCaptureDeviceInput(device: audioDevice) else {
             throw LKError.insufficientPermissions
         }
-        guard session.canAddInput(audioInput) else {
+        guard _session.canAddInput(audioInput) else {
             throw LKError.insufficientPermissions
         }
-        session.addInput(audioInput)
+        _session.addInput(audioInput)
         videoOutput.videoSettings =
           [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
         videoOutput.alwaysDiscardsLateVideoFrames = true
         videoOutput.connection(with: .video)?.videoOrientation = .portrait
-        guard session.canAddOutput(videoOutput) else {
+        guard _session.canAddOutput(videoOutput) else {
             throw LKError.insufficientPermissions
         }
-        session.addOutput(videoOutput)
-        guard session.canAddOutput(audioOutput) else {
+        _session.addOutput(videoOutput)
+        guard _session.canAddOutput(audioOutput) else {
             throw LKError.insufficientPermissions
         }
-        session.addOutput(audioOutput)
+        _session.addOutput(audioOutput)
         videoOutput.setSampleBufferDelegate(self, queue: cameraQueue)
         audioOutput.setSampleBufferDelegate(self, queue: cameraQueue)
-        session.automaticallyConfiguresApplicationAudioSession = false
+        _session.automaticallyConfiguresApplicationAudioSession = false
         device.set(frameRate: fps)
-        session.commitConfiguration()
+        _session.commitConfiguration()
     }
 }
 

@@ -15,7 +15,6 @@ import RealityKit
 import SceneKit
 
 class LightKitEngine: NSObject, ObservableObject {
-    
     /// The core that is set currently for the engine to receive input
     private var core: LKCore?
     
@@ -59,7 +58,21 @@ class LightKitEngine: NSObject, ObservableObject {
     private var metalView : MTKView?
     private var arView : ARView?
     private var arscnView : ARSCNView?
-        
+    
+    var outputView : UIView? {
+        if let _ = (try? currentCore)?.session as? AVCaptureSession{
+            return metalView
+        }
+        if let _ = (try? currentCore)?.session as? ARSession{
+            if #available(iOS 15, *) {
+                return arView
+            } else {
+                return arscnView
+            }
+        }
+        return nil
+    }
+    
     private var textureCache : CVMetalTextureCache?
     private var _commandQueue : MTLCommandQueue?
     
@@ -85,7 +98,7 @@ class LightKitEngine: NSObject, ObservableObject {
     override private init() {
         super.init()
         do {
-            try loadCore(with: .camera(position: .back))
+            try loadCore(position: .back, mode: .ar)
         } catch {
             print(error)
         }
@@ -94,8 +107,8 @@ class LightKitEngine: NSObject, ObservableObject {
     
     func loadMTKView(){
         metalView = MTKView(frame: .zero)
-        metalView?.device = MTLCreateSystemDefaultDevice()
-        metalDevice = metalView?.device
+        metalDevice = MTLCreateSystemDefaultDevice()
+        metalView?.device = metalDevice
         metalView?.backgroundColor = .clear
         metalView?.framebufferOnly = false
         metalView?.colorPixelFormat = .bgra8Unorm
@@ -106,7 +119,10 @@ class LightKitEngine: NSObject, ObservableObject {
     
     @available(iOS 15, *)
     func loadARView(){
-        arView = .init(frame: .zero)
+        arView = .init(frame: .zero, cameraMode: .ar, automaticallyConfigureSession: false)
+        if let session = try? currentCore.session as? ARSession{
+            arView?.session = session
+        }
         arView?.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
         arView?.renderCallbacks.postProcess = { [unowned self]
             context in
@@ -118,24 +134,44 @@ class LightKitEngine: NSObject, ObservableObject {
     func processARRenderCallback(context: ARView.PostProcessContext){
         let edge = MPSImageSobel(device: context.device)
         edge.encode(commandBuffer: context.commandBuffer, sourceTexture: context.sourceColorTexture, destinationTexture: context.compatibleTargetTexture)
+//        context.commandBuffer.addCompletedHandler { [unowned self] _ in
+//            originalTexture = .init(texture: context.compatibleTargetTexture, timestamp: .zero)
+//        }
         
     }
     
-    func loadCore(with coreType: LKCoreType) throws {
+    func loadCore(position: LKCore.Position, mode: LKCore.Mode) throws{
         unloadCore()
-        let coreResult = try coreType.getCore()
-        self.core = coreResult.core
-        if let _ = coreResult.viewType as? MTKView.Type{
-            loadMTKView()
-        }else if let _ = coreResult.viewType as? ARView.Type{
+        switch mode{
+        case .ar:
             if #available(iOS 15, *) {
                 loadARView()
-            } else {
-                
+                if let session = arView?.session{
+                    switch position{
+                    case .front:
+                        core = LKARCameraCore(position: .front, session: session)
+                    case .back:
+                        core = LKARCameraCore(position: .back, session: session)
+                    }
+                }
+            }else{
+                // fallback
             }
+        case .nonAR:
+            switch position{
+            case .front:
+                core = try LKCameraCore(position: .front, fps: 60)
+                loadMTKView()
+                viewProcessor = try? .init(device: metalDevice, metaDataType: .mirrored)
+            case .back:
+                core = try LKCameraCore(position: .back, fps: 60)
+                loadMTKView()
+                viewProcessor = try? .init(device: metalDevice)
+            }
+            
         }
-        loadViewProcessor()
-        coreSink = try (currentCore as! LKCameraCore).$currentFrame
+        
+        coreSink = try currentCore.$currentFrame
             .receive(on: RunLoop.main)
             .compactMap({ frame in
                 switch frame {
@@ -168,6 +204,7 @@ class LightKitEngine: NSObject, ObservableObject {
         
         orginalTextureSink = $originalTexture
             .receive(on: RunLoop.main)
+            .compactMap({ $0 })
             .sink { [unowned self] texture in
                 commitToProcessor()
             }
@@ -190,22 +227,7 @@ class LightKitEngine: NSObject, ObservableObject {
         
         return (threadgroupsPerGrid: threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
     }
-    
-    private func loadViewProcessor(){
-        guard let core = try? currentCore else {
-            preconditionFailure("Expected an object confirming to protocol LKCore to be loaded")
-        }
-        switch core.position {
-        case .unspecified:
-            viewProcessor = try? .init(device: metalDevice)
-        case .back:
-            viewProcessor = try? .init(device: metalDevice)
-        case .front:
-            viewProcessor = try? .init(device: metalDevice, metaDataType: .mirrored)
-        @unknown default:
-            viewProcessor = try? .init(device: metalDevice)
-        }
-    }
+
     
     func unloadCore() {
         try? currentCore.stop()
@@ -266,3 +288,4 @@ class LightKitEngine: NSObject, ObservableObject {
         return nil
     }
 }
+

@@ -9,7 +9,7 @@ import Metal
 import QuartzCore
 
 extension LightKitEngine{
-    internal class ViewProcessor{
+    class ViewProcessor{
         private let vertexBuffer: MTLBuffer
         private let textureBuffer: MTLBuffer
         private let vertexIndexBuffer: MTLBuffer

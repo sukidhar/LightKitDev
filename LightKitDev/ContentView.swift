@@ -7,7 +7,7 @@
 
 import SwiftUI
 import MetalKit
-
+import RealityKit
 struct ContentView: View {
     private let label = Text("Video feed")
 //    @StateObject var viewModel = ViewModel()
@@ -15,21 +15,7 @@ struct ContentView: View {
         CameraView()
             .aspectRatio( .init(width: 1080, height: 1920) ,contentMode: .fit)
             .onTapGesture {
-                do {
-                    switch try LightKitEngine.instance.currentCore.position {
-                        
-                    case .unspecified:
-                        try LightKitEngine.instance.loadCore(with: .camera(position: .back))
-                    case .back:
-                        try LightKitEngine.instance.loadCore(with: .camera(position: .front))
-                    case .front:
-                        try LightKitEngine.instance.loadCore(with: .camera(position: .back))
-                    @unknown default:
-                        try LightKitEngine.instance.loadCore(with: .camera(position: .front))
-                    }
-                }catch {
-                    print(error)
-                }
+                
             }
         //        FrameView()
     }
@@ -62,11 +48,11 @@ struct ContentView: View {
     }
     
     struct CameraView: UIViewRepresentable {
-        func updateUIView(_ uiView: MTKView, context: Context) {
+        func updateUIView(_ uiView: UIView, context: Context) {
         }
         
-        func makeUIView(context: Context) -> MTKView {
-            return .init()
+        func makeUIView(context: Context) -> UIView {
+            return LightKitEngine.instance.outputView!
         }
     }
 }
