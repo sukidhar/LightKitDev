@@ -72,13 +72,13 @@ extension RealityKit.ARView.PostProcessContext {
 @available(iOS 15, *)
 extension ARView.PostProcessContext {
     /// Reallocates a new Metal output texture if the input and output textures don't match in size.
-    func prepareTexture(_ texture: inout MTLTexture?, format pixelFormat: MTLPixelFormat = .rgba8Unorm) {
+    func prepareTexture(_ texture: inout MTLTexture?) {
         if texture?.width != self.sourceColorTexture.width
             || texture?.height != self.sourceColorTexture.height {
             let descriptor = MTLTextureDescriptor()
             descriptor.width = self.sourceColorTexture.width
             descriptor.height = self.sourceColorTexture.height
-            descriptor.pixelFormat = pixelFormat
+            descriptor.pixelFormat = sourceColorTexture.pixelFormat
             descriptor.usage = [.shaderRead, .shaderWrite]
             texture = self.device.makeTexture(descriptor: descriptor)
         }

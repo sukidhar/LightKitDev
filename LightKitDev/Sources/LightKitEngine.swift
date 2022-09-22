@@ -30,7 +30,7 @@ class LightKitEngine: NSObject, ObservableObject {
     /// The sink that fetches the current core frames
     private var coreSink : AnyCancellable?
     
-    let fallBackMTAllocator : MPSCopyAllocator =
+    private let fallBackMTAllocator : MPSCopyAllocator =
     {
         (kernel: MPSKernel, buffer: MTLCommandBuffer, texture: MTLTexture) -> MTLTexture in
         
@@ -52,6 +52,8 @@ class LightKitEngine: NSObject, ObservableObject {
     
     @Published public private(set) var processedTexture : LKTextureNode?
     
+    private var intermediaryTexture : MTLTexture?
+    
     private let context = CIContext()
     
     private var metalDevice : MTLDevice?
@@ -59,7 +61,7 @@ class LightKitEngine: NSObject, ObservableObject {
     private var arView : ARView?
     private var arscnView : ARSCNView?
     
-    var outputView : UIView? {
+    public var outputView : UIView? {
         if let _ = (try? currentCore)?.session as? AVCaptureSession{
             return metalView
         }
@@ -132,12 +134,14 @@ class LightKitEngine: NSObject, ObservableObject {
     
     @available(iOS 15, *)
     func processARRenderCallback(context: ARView.PostProcessContext){
+        context.prepareTexture(&self.intermediaryTexture)
+        let blur = MPSImageGaussianBlur(device: context.device, sigma: 5)
+        blur.encode(commandBuffer: context.commandBuffer, sourceTexture: context.sourceColorTexture, destinationTexture: intermediaryTexture!)
         let edge = MPSImageSobel(device: context.device)
-        edge.encode(commandBuffer: context.commandBuffer, sourceTexture: context.sourceColorTexture, destinationTexture: context.compatibleTargetTexture)
-//        context.commandBuffer.addCompletedHandler { [unowned self] _ in
-//            originalTexture = .init(texture: context.compatibleTargetTexture, timestamp: .zero)
-//        }
-        
+        edge.encode(commandBuffer: context.commandBuffer, inPlaceTexture: &intermediaryTexture!, fallbackCopyAllocator: fallBackMTAllocator)
+        let blitEncoder = context.commandBuffer.makeBlitCommandEncoder()
+        blitEncoder?.copy(from:  intermediaryTexture!, to: context.targetColorTexture)
+        blitEncoder?.endEncoding()        
     }
     
     func loadCore(position: LKCore.Position, mode: LKCore.Mode) throws{
@@ -263,17 +267,17 @@ class LightKitEngine: NSObject, ObservableObject {
         }
     }
     
-    func makeEmptyTexture(width: Int, height: Int) -> MTLTexture? {
+    func makeEmptyTexture(pixelFormat: MTLPixelFormat = .bgra8Unorm, width: Int, height: Int, metalDevice: MTLDevice? = nil) -> MTLTexture? {
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: viewProcessor?.pixelFormat ?? .bgra8Unorm,
+            pixelFormat: pixelFormat,
             width: width,
             height: height,
             mipmapped: false
         )
         textureDescriptor.usage = [MTLTextureUsage.shaderWrite, .shaderRead]
-        return metalDevice?.makeTexture(descriptor: textureDescriptor)
+        return (metalDevice ?? self.metalDevice)?.makeTexture(descriptor: textureDescriptor)
     }
-    
+        
     func makeTexture(imageBuffer : CVPixelBuffer) -> MTLTexture?{
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: viewProcessor?.pixelFormat ?? .bgra8Unorm,
