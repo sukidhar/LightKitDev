@@ -12,7 +12,6 @@ import RealityKit
 import SceneKit
 
 
-@available(iOS 15, *)
 class LKARCameraCore : LKCore{
     var position: Position
     
@@ -52,7 +51,6 @@ class LKARCameraCore : LKCore{
     }
 }
 
-@available(iOS 15, *)
 extension LKARCameraCore : ARSessionDelegate {
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         
@@ -63,7 +61,7 @@ extension LKARCameraCore : ARSessionDelegate {
     }
     
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
-        
+        currentFrame = .augmentedFrame(frame: frame)
     }
     
     func session(_ session: ARSession, didOutputAudioSampleBuffer audioSampleBuffer: CMSampleBuffer) {

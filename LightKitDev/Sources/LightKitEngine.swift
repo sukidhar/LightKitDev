@@ -59,7 +59,6 @@ class LightKitEngine: NSObject, ObservableObject {
     private var metalDevice : MTLDevice?
     private var metalView : MTKView?
     private var arView : ARView?
-    private var arscnView : ARSCNView?
     
     public var outputView : UIView? {
         if let _ = (try? currentCore)?.session as? AVCaptureSession{
@@ -69,7 +68,7 @@ class LightKitEngine: NSObject, ObservableObject {
             if #available(iOS 15, *) {
                 return arView
             } else {
-                return arscnView
+                return metalView
             }
         }
         return nil
@@ -119,12 +118,13 @@ class LightKitEngine: NSObject, ObservableObject {
         _commandQueue = metalDevice?.makeCommandQueue()
     }
     
+    func loadSceneView(){
+        
+    }
+    
     @available(iOS 15, *)
     func loadARView(){
         arView = .init(frame: .zero, cameraMode: .ar, automaticallyConfigureSession: false)
-        if let session = try? currentCore.session as? ARSession{
-            arView?.session = session
-        }
         arView?.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
         arView?.renderCallbacks.postProcess = { [unowned self]
             context in
@@ -141,7 +141,8 @@ class LightKitEngine: NSObject, ObservableObject {
         edge.encode(commandBuffer: context.commandBuffer, inPlaceTexture: &intermediaryTexture!, fallbackCopyAllocator: fallBackMTAllocator)
         let blitEncoder = context.commandBuffer.makeBlitCommandEncoder()
         blitEncoder?.copy(from:  intermediaryTexture!, to: context.targetColorTexture)
-        blitEncoder?.endEncoding()        
+        blitEncoder?.endEncoding()
+        print(context.time)
     }
     
     func loadCore(position: LKCore.Position, mode: LKCore.Mode) throws{
@@ -159,8 +160,9 @@ class LightKitEngine: NSObject, ObservableObject {
                     }
                 }
             }else{
-                // fallback
+                loadSceneView()
             }
+            
         case .nonAR:
             switch position{
             case .front:
