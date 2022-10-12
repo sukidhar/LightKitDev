@@ -57,22 +57,8 @@ class LightKitEngine: NSObject, ObservableObject {
     private let context = CIContext()
     
     private var metalDevice : MTLDevice?
-    private var metalView : MTKView?
-    private var arView : ARView?
-    
-    public var outputView : UIView? {
-        if let _ = (try? currentCore)?.session as? AVCaptureSession{
-            return metalView
-        }
-        if let _ = (try? currentCore)?.session as? ARSession{
-            if #available(iOS 15, *) {
-                return arView
-            } else {
-                return metalView
-            }
-        }
-        return nil
-    }
+
+    @Published private(set) var view : UIView = .init(frame: .zero)
     
     private var textureCache : CVMetalTextureCache?
     private var _commandQueue : MTLCommandQueue?
@@ -99,7 +85,7 @@ class LightKitEngine: NSObject, ObservableObject {
     override private init() {
         super.init()
         do {
-            try loadCore(position: .back, mode: .ar)
+            try loadCore(position: .front, mode: .ar)
         } catch {
             print(error)
         }
@@ -107,28 +93,32 @@ class LightKitEngine: NSObject, ObservableObject {
     }
     
     func loadMTKView(){
-        metalView = MTKView(frame: .zero)
-        metalDevice = MTLCreateSystemDefaultDevice()
-        metalView?.device = metalDevice
-        metalView?.backgroundColor = .clear
-        metalView?.framebufferOnly = false
-        metalView?.colorPixelFormat = .bgra8Unorm
-        metalView?.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
-        metalView?.preferredFramesPerSecond = 60
-        _commandQueue = metalDevice?.makeCommandQueue()
+        view = MTKView(frame: .zero)
+        if let metalView = view as? MTKView{
+            metalDevice = MTLCreateSystemDefaultDevice()
+            metalView.device = metalDevice
+            metalView.backgroundColor = .clear
+            metalView.framebufferOnly = false
+            metalView.colorPixelFormat = .bgra8Unorm
+            metalView.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
+            metalView.preferredFramesPerSecond = 60
+            _commandQueue = metalDevice?.makeCommandQueue()
+        }
     }
     
     func loadSceneView(){
-        
+        loadMTKView()
     }
     
     @available(iOS 15, *)
     func loadARView(){
-        arView = .init(frame: .zero, cameraMode: .ar, automaticallyConfigureSession: false)
-        arView?.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
-        arView?.renderCallbacks.postProcess = { [unowned self]
-            context in
-            processARRenderCallback(context: context)
+        view = ARView(frame: .zero, cameraMode: .ar, automaticallyConfigureSession: false)
+        if let arView = view as? ARView{
+            arView.contentScaleFactor = UIWindowScene.current?.screen.nativeScale ?? 1
+            arView.renderCallbacks.postProcess = { [unowned self]
+                context in
+                processARRenderCallback(context: context)
+            }
         }
     }
     
@@ -142,7 +132,6 @@ class LightKitEngine: NSObject, ObservableObject {
         let blitEncoder = context.commandBuffer.makeBlitCommandEncoder()
         blitEncoder?.copy(from:  intermediaryTexture!, to: context.targetColorTexture)
         blitEncoder?.endEncoding()
-        print(context.time)
     }
     
     func loadCore(position: LKCore.Position, mode: LKCore.Mode) throws{
@@ -151,12 +140,12 @@ class LightKitEngine: NSObject, ObservableObject {
         case .ar:
             if #available(iOS 15, *) {
                 loadARView()
-                if let session = arView?.session{
+                if let arView = view as? ARView{
                     switch position{
                     case .front:
-                        core = LKARCameraCore(position: .front, session: session)
+                        core = LKARCameraCore(position: .front, session: arView.session)
                     case .back:
-                        core = LKARCameraCore(position: .back, session: session)
+                        core = LKARCameraCore(position: .back, session: arView.session)
                     }
                 }
             }else{
@@ -174,7 +163,6 @@ class LightKitEngine: NSObject, ObservableObject {
                 loadMTKView()
                 viewProcessor = try? .init(device: metalDevice)
             }
-            
         }
         
         coreSink = try currentCore.$currentFrame
@@ -244,7 +232,7 @@ class LightKitEngine: NSObject, ObservableObject {
         guard var sourceTexture = originalTexture?.texture else { return }
         processedTexture = .init(texture: makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height), timestamp: originalTexture?.timestamp)
         autoreleasepool { [unowned self] in
-            if let drawable = metalView?.currentDrawable, let commandBuffer = try? commandQueue.makeCommandBuffer(){
+            if let metalView = view as? MTKView, let drawable = metalView.currentDrawable, let commandBuffer = try? commandQueue.makeCommandBuffer(){
                 do {
                     let sobel = MPSImageSobel(device: metalDevice!)
                     sobel.encode(commandBuffer: commandBuffer,
@@ -294,4 +282,3 @@ class LightKitEngine: NSObject, ObservableObject {
         return nil
     }
 }
-

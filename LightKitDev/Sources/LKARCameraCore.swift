@@ -33,6 +33,7 @@ class LKARCameraCore : LKCore{
     
     init(position: Position = .back, session : ARSession = .init()) {
         self.position = position
+        _session = session
         switch position{
         case .back:
             configuration = ARWorldTrackingConfiguration()
@@ -45,7 +46,6 @@ class LKARCameraCore : LKCore{
                 (configuration as? ARFaceTrackingConfiguration)?.isWorldTrackingEnabled = true
             }
         }
-        _session = session
         super.init()
         _session.delegate = self
     }

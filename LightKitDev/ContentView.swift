@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import Combine
 import MetalKit
 import RealityKit
+
 struct ContentView: View {
     private let label = Text("Video feed")
 //    @StateObject var viewModel = ViewModel()
@@ -15,7 +17,7 @@ struct ContentView: View {
         CameraView()
             .aspectRatio( .init(width: 1080, height: 1920) ,contentMode: .fit)
             .onTapGesture {
-                
+                try? LightKitEngine.instance.loadCore(position: .back, mode: .ar)
             }
         //        FrameView()
     }
@@ -31,28 +33,31 @@ struct ContentView: View {
         }
     }
     
-    struct FrameView : View{
-        @StateObject var viewModel = ViewModel()
-        var body : some View{
-            GeometryReader { geometry in
-                Image(uiImage: viewModel.image ?? UIImage())
-                    .resizable()
-                    .scaledToFill()
-                    .frame(
-                        width: geometry.size.width,
-                        height: geometry.size.height,
-                        alignment: .center)
-                    .clipped()
-            }
-        }
-    }
-    
     struct CameraView: UIViewRepresentable {
         func updateUIView(_ uiView: UIView, context: Context) {
+           
         }
         
         func makeUIView(context: Context) -> UIView {
-            return LightKitEngine.instance.outputView!
+            let uiView = UIView()
+            context.coordinator.viewSink = LightKitEngine.instance.$view.receive(on: DispatchQueue.main).sink(receiveValue: { view in
+                uiView.subviews.forEach{$0.removeFromSuperview()}
+                uiView.addSubview(view)
+                view.translatesAutoresizingMaskIntoConstraints = false
+                view.topAnchor.constraint(equalTo: uiView.topAnchor).isActive = true
+                view.leadingAnchor.constraint(equalTo: uiView.leadingAnchor).isActive = true
+                view.bottomAnchor.constraint(equalTo: uiView.bottomAnchor).isActive = true
+                view.trailingAnchor.constraint(equalTo: uiView.trailingAnchor).isActive = true
+            })
+            return uiView
+        }
+        
+        func makeCoordinator() -> Coordinator {
+            Coordinator()
+        }
+        
+        class Coordinator {
+            var viewSink : AnyCancellable?
         }
     }
 }

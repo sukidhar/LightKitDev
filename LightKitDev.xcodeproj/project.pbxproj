@@ -11,10 +11,11 @@
 		0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A05B28328A01B5500A51909 /* LKCameraCore.swift */; };
 		0A1A703928B3A1D600943E07 /* FrameView.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703828B3A1D600943E07 /* FrameView.metal */; };
 		0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703A28B3A7D800943E07 /* Extensions.swift */; };
-		0A1A703D28B3ED2A00943E07 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703C28B3ED2A00943E07 /* Filter.swift */; };
+		0A1A703D28B3ED2A00943E07 /* LKFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1A703C28B3ED2A00943E07 /* LKFilter.swift */; };
 		0A2A02C728DDB007009286D3 /* LightKitEngine+OffScreenProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A02C628DDB007009286D3 /* LightKitEngine+OffScreenProcessor.swift */; };
 		0A5DE2D928C62E9E001E449B /* EdgeDetector.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */; };
 		0A5DE2DB28D983E6001E449B /* LKARCameraCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */; };
+		0A6D0AFF28F6FD3700B04873 /* LKMathLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6D0AFE28F6FD3700B04873 /* LKMathLibrary.swift */; };
 		0AD326CD28AD666300F2031D /* LKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD326CC28AD666300F2031D /* LKError.swift */; };
 		0AE7D3B528DB3B7500AAEF1A /* LKTextureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */; };
 		0AE7D3B728DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE7D3B628DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift */; };
@@ -50,10 +51,13 @@
 		0A05B28328A01B5500A51909 /* LKCameraCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKCameraCore.swift; sourceTree = "<group>"; };
 		0A1A703828B3A1D600943E07 /* FrameView.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = FrameView.metal; sourceTree = "<group>"; };
 		0A1A703A28B3A7D800943E07 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		0A1A703C28B3ED2A00943E07 /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
+		0A1A703C28B3ED2A00943E07 /* LKFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKFilter.swift; sourceTree = "<group>"; };
 		0A2A02C628DDB007009286D3 /* LightKitEngine+OffScreenProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LightKitEngine+OffScreenProcessor.swift"; sourceTree = "<group>"; };
 		0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = EdgeDetector.metal; sourceTree = "<group>"; };
 		0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKARCameraCore.swift; sourceTree = "<group>"; };
+		0A6D0AFE28F6FD3700B04873 /* LKMathLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKMathLibrary.swift; sourceTree = "<group>"; };
+		0A6D0B0028F701DD00B04873 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
+		0A6D0B0228F7074100B04873 /* LightKitDev-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LightKitDev-Bridging-Header.h"; sourceTree = "<group>"; };
 		0A7F3DC828AFB1B100CDB01F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0AD326CC28AD666300F2031D /* LKError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKError.swift; sourceTree = "<group>"; };
 		0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LKTextureNode.swift; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 			children = (
 				0A1A703828B3A1D600943E07 /* FrameView.metal */,
 				0A5DE2D828C62E9E001E449B /* EdgeDetector.metal */,
+				0A6D0B0028F701DD00B04873 /* Types.h */,
 			);
 			path = Metal;
 			sourceTree = "<group>";
@@ -134,6 +139,7 @@
 				0AFBDE222896B18400A11DFA /* ContentView.swift */,
 				0AFBDE242896B18500A11DFA /* Assets.xcassets */,
 				0AFBDE262896B18500A11DFA /* Preview Content */,
+				0A6D0B0228F7074100B04873 /* LightKitDev-Bridging-Header.h */,
 			);
 			path = LightKitDev;
 			sourceTree = "<group>";
@@ -176,7 +182,8 @@
 				0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */,
 				0AD326CC28AD666300F2031D /* LKError.swift */,
 				0A1A703A28B3A7D800943E07 /* Extensions.swift */,
-				0A1A703C28B3ED2A00943E07 /* Filter.swift */,
+				0A1A703C28B3ED2A00943E07 /* LKFilter.swift */,
+				0A6D0AFE28F6FD3700B04873 /* LKMathLibrary.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -249,6 +256,7 @@
 				TargetAttributes = {
 					0AFBDE1C2896B18400A11DFA = {
 						CreatedOnToolsVersion = 14.0;
+						LastSwiftMigration = 1400;
 					};
 					0AFBDE2C2896B18500A11DFA = {
 						CreatedOnToolsVersion = 14.0;
@@ -320,10 +328,11 @@
 				0A1A703B28B3A7D800943E07 /* Extensions.swift in Sources */,
 				0A05B28428A01B5500A51909 /* LKCameraCore.swift in Sources */,
 				0A2A02C728DDB007009286D3 /* LightKitEngine+OffScreenProcessor.swift in Sources */,
+				0A6D0AFF28F6FD3700B04873 /* LKMathLibrary.swift in Sources */,
 				0AE7D3B728DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift in Sources */,
 				0A1A703928B3A1D600943E07 /* FrameView.metal in Sources */,
 				0A05B28228A01A8F00A51909 /* LKCore.swift in Sources */,
-				0A1A703D28B3ED2A00943E07 /* Filter.swift in Sources */,
+				0A1A703D28B3ED2A00943E07 /* LKFilter.swift in Sources */,
 				0AD326CD28AD666300F2031D /* LKError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -480,6 +489,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LightKitDev/Preview Content\"";
@@ -501,6 +511,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sukidhar.LightKitDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "LightKitDev/LightKitDev-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -511,6 +523,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LightKitDev/Preview Content\"";
@@ -532,6 +545,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sukidhar.LightKitDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "LightKitDev/LightKitDev-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
