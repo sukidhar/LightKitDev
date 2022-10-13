@@ -41,6 +41,8 @@ class LightKitEngine: NSObject, ObservableObject {
         descriptor.usage = [.shaderWrite, .shaderRead]
         return buffer.device.makeTexture(descriptor: descriptor)!
     }
+    
+    private var arCallBackSemaphore = DispatchSemaphore(value: 1)
         
     /// The current buffer received from the core. This publisher will not receieve any value if the core is not LKCameraCore
     @Published public private(set) var currentBuffer : CMSampleBuffer?
@@ -121,17 +123,21 @@ class LightKitEngine: NSObject, ObservableObject {
             }
         }
     }
-    
+
     @available(iOS 15, *)
     func processARRenderCallback(context: ARView.PostProcessContext){
+        arCallBackSemaphore.wait()
         context.prepareTexture(&self.intermediaryTexture)
         let blur = MPSImageGaussianBlur(device: context.device, sigma: 5)
         blur.encode(commandBuffer: context.commandBuffer, sourceTexture: context.sourceColorTexture, destinationTexture: intermediaryTexture!)
         let edge = MPSImageSobel(device: context.device)
         edge.encode(commandBuffer: context.commandBuffer, inPlaceTexture: &intermediaryTexture!, fallbackCopyAllocator: fallBackMTAllocator)
         let blitEncoder = context.commandBuffer.makeBlitCommandEncoder()
-        blitEncoder?.copy(from:  intermediaryTexture!, to: context.targetColorTexture)
+        blitEncoder?.copy(from:  intermediaryTexture!, to: context.compatibleTargetTexture)
         blitEncoder?.endEncoding()
+        context.commandBuffer.addCompletedHandler { [unowned self] _ in
+            arCallBackSemaphore.signal()
+        }
     }
     
     func loadCore(position: LKCore.Position, mode: LKCore.Mode) throws{
