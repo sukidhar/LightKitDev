@@ -48,6 +48,9 @@ class LightKitEngine: NSObject, ObservableObject {
     @Published public private(set) var currentBuffer : CMSampleBuffer?
     private var currentBufferSink : AnyCancellable?
     
+    @Published public private(set) var currentARFrame : ARFrame?
+    private var currentARFrameSink : AnyCancellable?
+    
     /// Unprocessed Metal Texture generated, i.e camera output or ARFrame output as is published.
     @Published public private(set) var originalTexture : LKTextureNode?
     private var orginalTextureSink : AnyCancellable?
@@ -82,6 +85,17 @@ class LightKitEngine: NSObject, ObservableObject {
             throw LKError.failedToIntialiseViewProcessor
         }
     }
+    
+    private var offScreenProcesser: OffScreenProcessor?
+    private var currentOffScreenProcessor : ViewProcessor {
+        get throws{
+            if let viewProcessor = viewProcessor{
+                return viewProcessor
+            }
+            throw LKError.failedToInitialiseOffScreenProcessor
+        }
+    }
+    
     static let instance = LightKitEngine()
     
     override private init() {
@@ -108,8 +122,13 @@ class LightKitEngine: NSObject, ObservableObject {
         }
     }
     
-    func loadSceneView(){
+    func loadARMetalView(){
         loadMTKView()
+        if let metalView = view as? MTKView{
+            metalView.depthStencilPixelFormat = .depth32Float_stencil8
+            metalView.colorPixelFormat = .bgra8Unorm
+            metalView.sampleCount = 1
+        }
     }
     
     @available(iOS 15, *)
@@ -144,19 +163,31 @@ class LightKitEngine: NSObject, ObservableObject {
         unloadCore()
         switch mode{
         case .ar:
-            if #available(iOS 15, *) {
-                loadARView()
-                if let arView = view as? ARView{
-                    switch position{
-                    case .front:
-                        core = LKARCameraCore(position: .front, session: arView.session)
-                    case .back:
-                        core = LKARCameraCore(position: .back, session: arView.session)
+//            if #available(iOS 15, *) {
+//                loadARView()
+//                if let arView = view as? ARView{
+//                    switch position{
+//                    case .front:
+//                        core = LKARCameraCore(position: .front, session: arView.session)
+//                    case .back:
+//                        core = LKARCameraCore(position: .back, session: arView.session)
+//                    }
+//                }
+//            }else{
+                loadARMetalView()
+                switch position{
+                case .front:
+                    core = LKARCameraCore(position: .front)
+                    viewProcessor = try? .init(device: metalDevice)
+                case .back:
+                    core = LKARCameraCore(position: .back)
+                }
+                if let device = metalDevice{
+                    if let queue = try? commandQueue{
+                        offScreenProcesser = .init(device: device, commandQueue: queue)
                     }
                 }
-            }else{
-                loadSceneView()
-            }
+//            }
             
         case .nonAR:
             switch position{
@@ -175,16 +206,19 @@ class LightKitEngine: NSObject, ObservableObject {
             .receive(on: RunLoop.main)
             .compactMap({ frame in
                 switch frame {
-                case .video(buffer: let buffer):
-                    return buffer
-                case .augmentedFrame(frame: _):
-                    return nil
                 case .none:
                     return nil
+                case .some(let frame):
+                    return frame
                 }
             })
-            .sink(receiveValue: { [weak self] buffer in
-                self?.currentBuffer = buffer
+            .sink(receiveValue: { [weak self] (frame: LKFrame) in
+                switch frame{
+                case .video(buffer: let buffer):
+                    self?.currentBuffer = buffer
+                case .augmentedFrame(frame: let frame):
+                    self?.currentARFrame = frame
+                }
             })
             
         try currentCore.run()
@@ -202,11 +236,18 @@ class LightKitEngine: NSObject, ObservableObject {
             })
             .assign(to: &$originalTexture)
         
+        currentARFrameSink = $currentARFrame
+            .receive(on: RunLoop.main)
+            .compactMap({ $0 })
+            .sink(receiveValue: { [unowned self] frame in
+                process(arFrame: frame)
+            })
+        
         orginalTextureSink = $originalTexture
             .receive(on: RunLoop.main)
             .compactMap({ $0 })
             .sink { [unowned self] texture in
-                commitToProcessor()
+                commitToViewProcessor()
             }
     }
     
@@ -234,7 +275,21 @@ class LightKitEngine: NSObject, ObservableObject {
         core = nil
     }
     
-    func commitToProcessor(){
+    func process(arFrame frame: ARFrame){
+        if let metalView = view as? MTKView, let drawable = metalView.currentDrawable {
+            intermediaryTexture = makeEmptyTexture(width: drawable.texture.width, height: drawable.texture.height)
+            offScreenProcesser?.render(viewportSize: view.frame.size, frame: frame, drawable: drawable)
+//            do {
+//                commandBuffer.present(drawable)
+//                commandBuffer.commit()
+//                commandBuffer.waitUntilCompleted()
+//            } catch {
+//                print(error)
+//            }
+        }
+    }
+    
+    func commitToViewProcessor(){
         guard var sourceTexture = originalTexture?.texture else { return }
         processedTexture = .init(texture: makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height), timestamp: originalTexture?.timestamp)
         autoreleasepool { [unowned self] in
@@ -270,7 +325,7 @@ class LightKitEngine: NSObject, ObservableObject {
             height: height,
             mipmapped: false
         )
-        textureDescriptor.usage = [MTLTextureUsage.shaderWrite, .shaderRead]
+        textureDescriptor.usage = [MTLTextureUsage.shaderWrite, .shaderRead, .renderTarget]
         return (metalDevice ?? self.metalDevice)?.makeTexture(descriptor: textureDescriptor)
     }
         

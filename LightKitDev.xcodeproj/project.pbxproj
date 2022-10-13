@@ -110,6 +110,36 @@
 			path = Metal;
 			sourceTree = "<group>";
 		};
+		0AD980DF28F7E5C2006F8A0C /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */,
+				0AE7D3B628DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift */,
+				0A2A02C628DDB007009286D3 /* LightKitEngine+OffScreenProcessor.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		0AD980E028F7E5CD006F8A0C /* Cores */ = {
+			isa = PBXGroup;
+			children = (
+				0A05B28128A01A8F00A51909 /* LKCore.swift */,
+				0A05B28328A01B5500A51909 /* LKCameraCore.swift */,
+				0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */,
+			);
+			path = Cores;
+			sourceTree = "<group>";
+		};
+		0AD980E128F7E5EA006F8A0C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */,
+				0AD326CC28AD666300F2031D /* LKError.swift */,
+				0A1A703C28B3ED2A00943E07 /* LKFilter.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		0AFBDE142896B18300A11DFA = {
 			isa = PBXGroup;
 			children = (
@@ -173,16 +203,10 @@
 			isa = PBXGroup;
 			children = (
 				0A1A703728B3A19100943E07 /* Metal */,
-				0AFBDE4B2896B88F00A11DFA /* LightKitEngine.swift */,
-				0AE7D3B628DB3BAE00AAEF1A /* LightKitEngine+ViewProcessor.swift */,
-				0A2A02C628DDB007009286D3 /* LightKitEngine+OffScreenProcessor.swift */,
-				0AE7D3B428DB3B7500AAEF1A /* LKTextureNode.swift */,
-				0A05B28128A01A8F00A51909 /* LKCore.swift */,
-				0A05B28328A01B5500A51909 /* LKCameraCore.swift */,
-				0A5DE2DA28D983E6001E449B /* LKARCameraCore.swift */,
-				0AD326CC28AD666300F2031D /* LKError.swift */,
+				0AD980DF28F7E5C2006F8A0C /* Engine */,
+				0AD980E128F7E5EA006F8A0C /* Model */,
+				0AD980E028F7E5CD006F8A0C /* Cores */,
 				0A1A703A28B3A7D800943E07 /* Extensions.swift */,
-				0A1A703C28B3ED2A00943E07 /* LKFilter.swift */,
 				0A6D0AFE28F6FD3700B04873 /* LKMathLibrary.swift */,
 			);
 			path = Sources;

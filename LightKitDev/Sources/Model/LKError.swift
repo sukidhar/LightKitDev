@@ -12,6 +12,7 @@ enum LKError : Error {
     case devicesUnavailable
     case coreUnavailable
     case failedToIntialiseViewProcessor
+    case failedToInitialiseOffScreenProcessor
 }
 
 extension LKError : LocalizedError {
@@ -25,6 +26,8 @@ extension LKError : LocalizedError {
             return NSLocalizedString("LKCore is not loaded to fire up engine", comment: "")
         case .failedToIntialiseViewProcessor:
             return NSLocalizedString("Due to invalid ViewProcessorMetaData, Failed to configure the ViewProcessor", comment: "")
+        case .failedToInitialiseOffScreenProcessor:
+            return NSLocalizedString("Due to invalid MetaData, Failed to configure the OffScreenViewProcessor", comment: "")
         }
     }
 }

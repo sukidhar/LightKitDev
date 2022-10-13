@@ -65,7 +65,7 @@ extension LKARCameraCore : ARSessionDelegate {
     }
     
     func session(_ session: ARSession, didOutputAudioSampleBuffer audioSampleBuffer: CMSampleBuffer) {
-        
+        audioBuffer = audioSampleBuffer
     }
     
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
