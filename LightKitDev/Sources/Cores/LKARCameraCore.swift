@@ -44,6 +44,7 @@ class LKARCameraCore : LKCore{
             configuration = ARFaceTrackingConfiguration()
             if ARFaceTrackingConfiguration.supportsWorldTracking{
                 (configuration as? ARFaceTrackingConfiguration)?.isWorldTrackingEnabled = true
+                (configuration as? ARFaceTrackingConfiguration)?.maximumNumberOfTrackedFaces = ARFaceTrackingConfiguration.supportedNumberOfTrackedFaces
             }
         }
         super.init()
@@ -53,11 +54,11 @@ class LKARCameraCore : LKCore{
 
 extension LKARCameraCore : ARSessionDelegate {
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
-        
+        print("anchor added")
     }
     
     func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
-        
+        print("anchor removed")
     }
     
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
@@ -69,7 +70,7 @@ extension LKARCameraCore : ARSessionDelegate {
     }
     
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
-        
+        print("anchor updated \(session.currentFrame?.timestamp)")
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {

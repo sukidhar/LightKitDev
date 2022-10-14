@@ -68,9 +68,12 @@ extension LightKitEngine{
         var anchorUniformBufferAddress: UnsafeMutableRawPointer!
         var anchorInstanceCount: Int = 0
         
+        var sceneRenderer : SCNRenderer!
+        
         init(device: MTLDevice, commandQueue: MTLCommandQueue){
             self.device = device
             self.commandQueue = commandQueue
+            self.sceneRenderer = .init(device: device)
             
             let sharedUniformBufferSize = kAlignedSharedUniformsSize * kMaxBuffersInFlight
             let anchorUniformBufferSize = kAlignedInstanceUniformsSize * kMaxBuffersInFlight
@@ -119,10 +122,10 @@ extension LightKitEngine{
                 print("Failed to created captured image pipeline state, error \(error)")
             }
             
-            let capturedImageDepthStateDescriptor = MTLDepthStencilDescriptor()
-            capturedImageDepthStateDescriptor.depthCompareFunction = .always
-            capturedImageDepthStateDescriptor.isDepthWriteEnabled = false
-            capturedImageDepthState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
+//            let capturedImageDepthStateDescriptor = MTLDepthStencilDescriptor()
+//            capturedImageDepthStateDescriptor.depthCompareFunction = .always
+//            capturedImageDepthStateDescriptor.isDepthWriteEnabled = false
+//            capturedImageDepthState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
             
             var textureCache: CVMetalTextureCache?
             CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
@@ -139,7 +142,7 @@ extension LightKitEngine{
                 
                 let renderPassDescriptor = MTLRenderPassDescriptor()
                 renderPassDescriptor.colorAttachments[0].texture = drawable.texture
-                renderPassDescriptor.colorAttachments[0].loadAction = .clear
+                renderPassDescriptor.colorAttachments[0].loadAction = .load
                 renderPassDescriptor.colorAttachments[0].clearColor = .init(red: 0, green: 0, blue: 0, alpha: 1)
                 renderPassDescriptor.colorAttachments[0].storeAction = .store
                 
@@ -147,6 +150,29 @@ extension LightKitEngine{
                     drawCapturedImage(renderEncoder: renderEncoder)
                     renderEncoder.endEncoding()
                 }
+                
+                if let anchor = frame.anchors.first as? ARFaceAnchor{
+                    let scene = SCNScene()
+                    
+                    let faceGeometry = ARSCNFaceGeometry(device: device)
+                    let node = SCNNode(geometry: faceGeometry)
+                    node.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+                    (node.geometry as? ARSCNFaceGeometry)?.update(from: anchor.geometry)
+                    scene.rootNode.addChildNode(node)
+                    node.simdTransform = anchor.transform
+                    
+                    let cameraNode = SCNNode()
+                    let camera = SCNCamera()
+                    cameraNode.camera = camera
+                    cameraNode.simdTransform = frame.camera.viewMatrix(for: .portrait).inverse
+                    camera.projectionTransform = SCNMatrix4(frame.camera.projectionMatrix(for: .landscapeRight, viewportSize: viewportSize, zNear: 0.005, zFar: 1000))
+                    scene.rootNode.addChildNode(cameraNode)
+                                        
+                    sceneRenderer.scene = scene
+                    sceneRenderer.pointOfView = cameraNode
+                    sceneRenderer.render(atTime: 0, viewport: .init(origin: .init(x: 0, y: 0), size: .init(width: drawable.texture.width, height: drawable.texture.height)), commandBuffer: commandBuffer, passDescriptor: renderPassDescriptor)
+                }
+                
                 
                 commandBuffer.present(drawable)
                 commandBuffer.commit()
@@ -178,7 +204,7 @@ extension LightKitEngine{
             // Set render command encoder state
             renderEncoder.setCullMode(.none)
             renderEncoder.setRenderPipelineState(capturedImagePipelineState)
-            renderEncoder.setDepthStencilState(capturedImageDepthState)
+//            renderEncoder.setDepthStencilState(capturedImageDepthState)
             
             // Set mesh's vertex buffers
             renderEncoder.setVertexBuffer(imagePlaneVertexBuffer, offset: 0, index: Int(kBufferIndexMeshPositions.rawValue))
