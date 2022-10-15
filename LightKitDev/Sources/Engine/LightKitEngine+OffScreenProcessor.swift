@@ -113,8 +113,8 @@ extension LightKitEngine{
             capturedImagePipelineStateDescriptor.fragmentFunction = capturedImageFragmentFunction
             capturedImagePipelineStateDescriptor.vertexDescriptor = imagePlaneVertexDescriptor
             capturedImagePipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-            //            capturedImagePipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
-            //            capturedImagePipelineStateDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
+//            capturedImagePipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
+//            capturedImagePipelineStateDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
             
             do {
                 try capturedImagePipelineState = device.makeRenderPipelineState(descriptor: capturedImagePipelineStateDescriptor)
@@ -122,10 +122,10 @@ extension LightKitEngine{
                 print("Failed to created captured image pipeline state, error \(error)")
             }
             
-//            let capturedImageDepthStateDescriptor = MTLDepthStencilDescriptor()
-//            capturedImageDepthStateDescriptor.depthCompareFunction = .always
-//            capturedImageDepthStateDescriptor.isDepthWriteEnabled = false
-//            capturedImageDepthState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
+            let capturedImageDepthStateDescriptor = MTLDepthStencilDescriptor()
+            capturedImageDepthStateDescriptor.depthCompareFunction = .always
+            capturedImageDepthStateDescriptor.isDepthWriteEnabled = false
+            capturedImageDepthState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
             
             var textureCache: CVMetalTextureCache?
             CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
@@ -144,7 +144,6 @@ extension LightKitEngine{
                 renderPassDescriptor.colorAttachments[0].texture = drawable.texture
                 renderPassDescriptor.colorAttachments[0].loadAction = .load
                 renderPassDescriptor.colorAttachments[0].clearColor = .init(red: 0, green: 0, blue: 0, alpha: 1)
-                renderPassDescriptor.colorAttachments[0].storeAction = .store
                 
                 if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
                     drawCapturedImage(renderEncoder: renderEncoder)
@@ -156,21 +155,24 @@ extension LightKitEngine{
                     
                     let faceGeometry = ARSCNFaceGeometry(device: device)
                     let node = SCNNode(geometry: faceGeometry)
-                    node.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+                    node.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "wireframeTexture")
                     (node.geometry as? ARSCNFaceGeometry)?.update(from: anchor.geometry)
                     scene.rootNode.addChildNode(node)
                     node.simdTransform = anchor.transform
+                    
                     
                     let cameraNode = SCNNode()
                     let camera = SCNCamera()
                     cameraNode.camera = camera
                     cameraNode.simdTransform = frame.camera.viewMatrix(for: .portrait).inverse
-                    camera.projectionTransform = SCNMatrix4(frame.camera.projectionMatrix(for: .landscapeRight, viewportSize: viewportSize, zNear: 0.005, zFar: 1000))
+                    camera.projectionTransform = SCNMatrix4(frame.camera.projectionMatrix(for: .portrait, viewportSize: viewportSize, zNear: 0.005, zFar: 1000))
                     scene.rootNode.addChildNode(cameraNode)
                                         
                     sceneRenderer.scene = scene
                     sceneRenderer.pointOfView = cameraNode
                     sceneRenderer.render(atTime: 0, viewport: .init(origin: .init(x: 0, y: 0), size: .init(width: drawable.texture.width, height: drawable.texture.height)), commandBuffer: commandBuffer, passDescriptor: renderPassDescriptor)
+                    
+                    
                 }
                 
                 
