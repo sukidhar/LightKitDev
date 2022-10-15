@@ -101,7 +101,7 @@ class LightKitEngine: NSObject, ObservableObject {
     override private init() {
         super.init()
         do {
-            try loadCore(position: .front, mode: .ar)
+            try loadCore(position: .back, mode: .nonAR)
         } catch {
             print(error)
         }
@@ -289,22 +289,21 @@ class LightKitEngine: NSObject, ObservableObject {
         }
     }
     
+    
     func commitToViewProcessor(){
-        guard var sourceTexture = originalTexture?.texture else { return }
-        processedTexture = .init(texture: makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height), timestamp: originalTexture?.timestamp)
+        guard let sourceTexture = originalTexture?.texture else { return }
         autoreleasepool { [unowned self] in
-            if let metalView = view as? MTKView, let drawable = metalView.currentDrawable, let commandBuffer = try? commandQueue.makeCommandBuffer(){
+            if let metalView = view as? MTKView, let drawable = metalView.currentDrawable, let commandBuffer = try? commandQueue.makeCommandBuffer(), var pipelineTexture = makeEmptyTexture(width: sourceTexture.width, height: sourceTexture.height){
                 do {
                     let sobel = MPSImageSobel(device: metalDevice!)
+                    sobel.encode(commandBuffer: commandBuffer, sourceTexture: sourceTexture, destinationTexture: pipelineTexture)
+                
+                    let filter = MPSImageGaussianBlur(device: metalDevice!, sigma: 9)
+                    filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &pipelineTexture)
                     sobel.encode(commandBuffer: commandBuffer,
-                                    inPlaceTexture: &sourceTexture,
+                                    inPlaceTexture: &pipelineTexture,
                                     fallbackCopyAllocator: fallBackMTAllocator)
-//                    let filter = MPSImageGaussianBlur(device: metalDevice!, sigma: 3)
-//                    filter.encode(commandBuffer: commandBuffer, inPlaceTexture: &sourceTexture, fallbackCopyAllocator: fallBackMTAllocator)
-//                    sobel.encode(commandBuffer: commandBuffer,
-//                                    inPlaceTexture: &sourceTexture,
-//                                    fallbackCopyAllocator: fallBackMTAllocator)
-                    try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: sourceTexture)
+                    try currentProcessor.encode(commandBuffer: commandBuffer, targetDrawable: drawable, presentingTexture: pipelineTexture)
                     commandBuffer.addCompletedHandler({ [unowned self] _ in
                         processedTexture = .init(texture: drawable.texture, timestamp: originalTexture?.timestamp)
                     })

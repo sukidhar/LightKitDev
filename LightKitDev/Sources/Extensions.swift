@@ -20,14 +20,15 @@ extension UIWindowScene{
 
 extension AVCaptureDevice {
     func set(frameRate: Double) {
-        do { try lockForConfiguration()
+        do {
+            try lockForConfiguration()
             activeFormat = formats.sorted(by: { f1, f2 in
-                f1.formatDescription.dimensions.height > f2.formatDescription.dimensions.height && f1.formatDescription.dimensions.width > f2.formatDescription.dimensions.width
+                f1.formatDescription.dimensions.width > f2.formatDescription.dimensions.width || f1.formatDescription.dimensions.height > f2.formatDescription.dimensions.height
             })
             .first(where: { format in
                 format.videoSupportedFrameRateRanges.contains { range in
                     range.maxFrameRate == frameRate
-                }
+                } &&  format.formatDescription.dimensions.height == 1080 && format.formatDescription.dimensions.width == 1920
             }) ?? activeFormat
             guard let range = activeFormat.videoSupportedFrameRateRanges.first,
                   range.minFrameRate...range.maxFrameRate ~= frameRate
